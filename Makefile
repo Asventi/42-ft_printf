@@ -1,52 +1,146 @@
-CC := cc
-NAME := libftprintf.a
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: pjarnac <pjarnac@student.42lyon.fr>        +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2024/11/19 11:53:22 by pjarnac           #+#    #+#              #
+#    Updated: 2024/11/20 16:40:58 by pjarnac          ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
 
-BUILD_DIR := .build/
-SRC_DIR := src/
-OBJ_DIR := $(BUILD_DIR)obj/
-LIB_DIR := lib/
-LIBS := libft.a
-LIBS_PATH := $(addsuffix /, $(addprefix $(LIB_DIR), $(basename $(LIBS))))
-INCLUDES := includes/ $(addsuffix includes/, $(LIBS_PATH))
+NAME = libftprintf.a
 
-SRC_FILE := ft_printf.c formats/num_formats.c formats/formats.c formats/str_formats.c
+# ================FILES================ #
 
-OBJ := $(SRC_FILE:%.c=$(OBJ_DIR)%.o)
+MAKE_DIR		:=	.make/
+BUILD_DIR		:=	$(MAKE_DIR)build_$(shell git branch --show-current)/
+BASE_BUILD_DIR	:= normal/
 
-DEPS := $(OBJ:%.o=%.d)
+SRC_DIR			=	src/
 
-CFLAGS += -MMD -MP -Wall -Wextra -Werror
-I_INCLUDES := $(INCLUDES:%=-I%)
+OBJS			=	$(patsubst %.c, $(BUILD_DIR)%.o, $(SRC))
 
+DEPS			=	$(patsubst %.c, $(BUILD_DIR)%.d, $(SRC))
+
+# ================ROOT================= #
+
+SRC 		=	ft_printf.c \
+
+# ===============FORMATS=============== #
+
+SRC += $(addprefix $(FORMATS_DIR), $(FORMATS_SRC))
+
+FORMATS_DIR =	formats/
+FORMATS_SRC =	formats.c \
+				num_formats.c \
+				str_formats.c \
+
+# ==========LIBS / INCLUDES============ #
+
+LIBS_DIR	=	lib/
+LIBS_PATH	=	libft/libft.a
+LIBS_PATH	:=	$(addprefix $(LIBS_DIR), $(LIBS_PATH))
+LIBS		=	$(patsubst lib%.a, %, $(notdir $(LIBS_PATH)))
+
+INCS_DIR	=	includes/
+INCLUDES	=	$(INCS_DIR) \
+				$(dir $(LIBS_PATH))$(INCS_DIR)
+
+# ===============CONFIGS=============== #
+
+CC			=	cc
+CFLAGS		+=	-Wall -Wextra -Werror
+CPPFLAGS	+=	$(addprefix -I, $(INCLUDES))
+
+LDFLAGS		+=	$(addprefix -L, $(dir $(LIBS_PATH)))
+LDLIBS		+=	$(addprefix -l, $(LIBS))
+
+AR			=	ar
+ARFLAGS		=	-rcs
+
+MAKEFLAGS	+=	--no-print-directory
+
+# ================MODES================ #
+
+MODES		:= debug fsanitize optimize full-optimize
+
+MODE_TRACE	:= $(BUILD_DIR).mode_trace
+LAST_MODE	:= $(shell cat $(MODE_TRACE) 2>/dev/null)
+
+MODE ?=
+
+ifneq ($(MODE), )
+	BUILD_DIR := $(BUILD_DIR)$(MODE)/
+else
+	BUILD_DIR := $(BUILD_DIR)$(BASE_BUILD_DIR)
+endif
+
+ifeq ($(MODE), debug)
+	CFLAGS += -g3
+else ifeq ($(MODE), fsanitize)
+	CFLAGS += -g3 -fsanitize=address
+else ifeq ($(MODE), optimize)
+	CFLAGS += -O2
+else ifeq ($(MODE), full-optimize)
+	CFLAGS += -O3
+else ifneq ($(MODE),)
+	ERROR = MODE
+endif
+
+ifneq ($(LAST_MODE), $(MODE))
+$(NAME): force
+endif
+
+# ================TARGETS============== #
+
+.PHONY: all
 all: $(NAME)
 
-$(NAME): $(OBJ) $(foreach lib,$(LIBS),$(LIB_DIR)$(patsubst %.a,%,$(lib))/$(lib))
-	ar -rcs $@ $^
+show:
+	@echo $(SRC_TEST)
 
-$(OBJ_DIR)%.o: $(SRC_DIR)%.c
+$(NAME): $(LIBS_PATH) $(OBJS)
+	@echo $(MODE) > $(MODE_TRACE)
+	cp $(LIBS_PATH) $(NAME)
+	$(AR) $(ARFLAGS) $(NAME) $(OBJS)
+
+$(BUILD_DIR)%.o: $(SRC_DIR)%.c
 	@mkdir -p $(@D)
-	cc $(I_INCLUDES) -c $< -o $@ $(CFLAGS)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
-%.a:
-	make -C $(@D)
+$(LIBS_PATH):
+	$(MAKE) -C $(@D)
 
-test: src/test.c $(NAME) $(foreach lib,$(LIBS),$(LIB_DIR)$(patsubst %.a,%,$(lib))/$(lib))
-	cc $(I_INCLUDES) $^ -o $@
+.PHONY: $(MODES)
+$(MODES):
+	$(MAKE) MODE=$@
 
+.PHONY: clean
 clean:
-	@for lib_path in $(LIBS_PATH) ; do \
-		make clean -C $${lib_path} ; \
-	done
-	rm -rf $(BUILD_DIR)
+	-for lib in $(dir $(LIBS_PATH)); do $(MAKE) -s -C $$lib $@; done
+	rm -rf $(MAKE_DIR)
 
-fclean: clean
-	@for lib_path in $(LIBS_PATH) ; do \
-		make fclean -C $${lib_path} ; \
-	done
-	rm -f $(NAME)
+.PHONY: fclean
+fclean:
+	-for lib in $(dir $(LIBS_PATH)); do $(MAKE) -s -C $$lib $@; done
+	rm -rf $(MAKE_DIR) $(NAME)
 
-re: fclean all
+.PHONY: re
+re: fclean
+	$(MAKE)
 
-.PHONY: all clean fclean re bonus
+# ================MISC================= #
+
+.PHONY: print-%
+print-%:
+	@echo $(patsubst print-%,%,$@)=
+	@echo $($(patsubst print-%,%,$@))
+
+.PHONY: force
+force:
 
 -include $(DEPS)
+
+.DEFAULT_GOAL := all

@@ -1,45 +1,215 @@
-CC := cc
-NAME := libft.a
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: pjarnac <pjarnac@student.42lyon.fr>        +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2024/11/19 11:53:22 by pjarnac           #+#    #+#              #
+#    Updated: 2024/11/21 15:30:36 by pjarnac          ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
 
-BUILD_DIR := .build/
-SRC_DIR := src/
-OBJ_DIR := $(BUILD_DIR)obj/
-INCLUDES := includes/
+NAME = libft.a
 
-SRC_FILE := is/ft_isalpha.c is/ft_isdigit.c is/ft_isalnum.c is/ft_isascii.c\
-is/ft_isprint.c str/ft_strlen.c memory/ft_memset.c memory/ft_bzero.c memory/ft_memcpy.c\
-memory/ft_memmove.c to/ft_toupper.c to/ft_tolower.c str/ft_strlcpy.c str/ft_strlcat.c\
-str/ft_strchr.c str/ft_strrchr.c str/ft_strncmp.c memory/ft_memchr.c memory/ft_memcmp.c\
-str/ft_strnstr.c str/ft_atoi.c memory/ft_calloc.c str/ft_strdup.c str/ft_substr.c\
-str/ft_strjoin.c str/ft_strtrim.c str/ft_split.c str/ft_itoa.c str/ft_strmapi.c\
-str/ft_striteri.c put/ft_putchar_fd.c put/ft_putstr_fd.c put/ft_putendl_fd.c\
-put/ft_putnbr_fd.c chained/ft_lstnew.c chained/ft_lstadd_front.c chained/ft_lstsize.c chained/ft_lstlast.c\
-chained/ft_lstadd_back.c chained/ft_lstdelone.c chained/ft_lstclear.c chained/ft_lstiter.c chained/ft_lstmap.c
+# ================FILES================ #
 
-OBJ := $(SRC_FILE:%.c=$(OBJ_DIR)%.o)
+MAKE_DIR		:=	.make/
+BUILD_DIR		:=	$(MAKE_DIR)build_$(shell git branch --show-current)/
+BASE_BUILD_DIR	:= normal/
 
-DEPS := $(OBJ:%.o=%.d)
+SRC_DIR			=	src/
 
-CFLAGS += -MMD -MP -Wall -Wextra -Werror
-I_INCLUDES := $(INCLUDES:%=-I%)
+OBJS			=	$(patsubst %.c, $(BUILD_DIR)%.o, $(SRC))
 
+DEPS			=	$(patsubst %.c, $(BUILD_DIR)%.d, $(SRC))
+
+# ================ROOT================= #
+
+SRC 		=
+
+# ===============CHAINED=============== #
+
+SRC += $(addprefix $(CHAINED_DIR), $(CHAINED_SRC))
+
+CHAINED_DIR =	chained/
+CHAINED_SRC =	ft_lstadd_back.c \
+				ft_lstadd_front.c \
+				ft_lstclear.c \
+				ft_lstdelone.c \
+				ft_lstiter.c \
+				ft_lstlast.c \
+				ft_lstmap.c \
+				ft_lstnew.c \
+				ft_lstsize.c \
+
+# ==================IS================= #
+
+SRC += $(addprefix $(IS_DIR), $(IS_SRC))
+
+IS_DIR =		is/
+IS_SRC =		ft_isalnum.c \
+				ft_isalpha.c \
+				ft_isascii.c \
+				ft_isdigit.c \
+				ft_isprint.c \
+
+# ================MEMORY=============== #
+
+SRC += $(addprefix $(MEMORY_DIR), $(MEMORY_SRC))
+
+MEMORY_DIR =	memory/
+MEMORY_SRC =	ft_bzero.c \
+				ft_calloc.c \
+				ft_memchr.c \
+				ft_memcmp.c \
+				ft_memcpy.c \
+				ft_memmove.c \
+				ft_memset.c \
+
+# =================PUT================= #
+
+SRC += $(addprefix $(PUT_DIR), $(PUT_SRC))
+
+PUT_DIR =		put/
+PUT_SRC =		ft_putchar_fd.c \
+				ft_putendl_fd.c \
+				ft_putnbr_fd.c \
+				ft_putstr_fd.c \
+
+# =================STR================= #
+
+SRC += $(addprefix $(STR_DIR), $(STR_SRC))
+
+STR_DIR =		str/
+STR_SRC =		ft_atoi.c \
+				ft_itoa.c \
+				ft_split.c \
+				ft_strchr.c \
+				ft_strdup.c \
+				ft_striteri.c \
+				ft_strjoin.c \
+				ft_strlcat.c \
+				ft_strlcpy.c \
+				ft_strlen.c \
+				ft_strmapi.c \
+				ft_strncmp.c \
+				ft_strnstr.c \
+				ft_strrchr.c \
+				ft_strtrim.c \
+				ft_substr.c \
+
+# ==================TO================= #
+
+SRC += $(addprefix $(TO_DIR), $(TO_SRC))
+
+TO_DIR =		to/
+TO_SRC =		ft_tolower.c \
+				ft_toupper.c \
+
+# ==========LIBS / INCLUDES============ #
+
+LIBS_DIR	=
+LIBS_PATH	=
+LIBS_PATH	:=	$(addprefix $(LIBS_DIR), $(LIBS_PATH))
+LIBS		=	$(patsubst lib%.a, %, $(notdir $(LIBS_PATH)))
+
+INCS_DIR	=	includes/
+INCLUDES	=	$(INCS_DIR) \
+				$(dir $(LIBS_PATH))$(INCS_DIR)
+
+# ===============CONFIGS=============== #
+
+CC			=	cc
+CFLAGS		+=	-Wall -Wextra -Werror
+CPPFLAGS	+=	$(addprefix -I, $(INCLUDES))
+
+LDFLAGS		+=	$(addprefix -L, $(dir $(LIBS_PATH)))
+LDLIBS		+=	$(addprefix -l, $(LIBS))
+
+AR			=	ar
+ARFLAGS		=	-rcs
+
+MAKEFLAGS	+=	--no-print-directory
+
+# ================MODES================ #
+
+MODES		:= debug fsanitize optimize full-optimize
+
+MODE_TRACE	:= $(BUILD_DIR).mode_trace
+LAST_MODE	:= $(shell cat $(MODE_TRACE) 2>/dev/null)
+
+MODE ?=
+
+ifneq ($(MODE), )
+	BUILD_DIR := $(BUILD_DIR)$(MODE)/
+else
+	BUILD_DIR := $(BUILD_DIR)$(BASE_BUILD_DIR)
+endif
+
+ifeq ($(MODE), debug)
+	CFLAGS += -g3
+else ifeq ($(MODE), fsanitize)
+	CFLAGS += -g3 -fsanitize=address
+else ifeq ($(MODE), optimize)
+	CFLAGS += -O2
+else ifeq ($(MODE), full-optimize)
+	CFLAGS += -O3
+else ifneq ($(MODE),)
+	ERROR = MODE
+endif
+
+ifneq ($(LAST_MODE), $(MODE))
+$(NAME): force
+endif
+
+# ================TARGETS============== #
+
+.PHONY: all
 all: $(NAME)
 
-$(NAME): $(OBJ)
-	ar -rcs $@ $^
+show:
+	@echo $(SRC_TEST)
 
-$(OBJ_DIR)%.o: $(SRC_DIR)%.c
+$(NAME): $(OBJS)
+	@echo $(MODE) > $(MODE_TRACE)
+	$(AR) $(ARFLAGS) $(NAME) $(OBJS)
+
+$(BUILD_DIR)%.o: $(SRC_DIR)%.c
 	@mkdir -p $(@D)
-	cc $(I_INCLUDES) -c $< -o $@ $(CFLAGS)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
+$(LIBS_PATH): force
+	$(MAKE) -C $(@D)
+
+.PHONY: $(MODES)
+$(MODES):
+	$(MAKE) MODE=$@
+
+.PHONY: clean
 clean:
-	rm -rf $(BUILD_DIR)
+	-for lib in $(dir $(LIBS_PATH)); do $(MAKE) -s -C $$lib $@; done
+	rm -rf $(MAKE_DIR)
 
-fclean: clean
-	rm -f $(NAME)
+.PHONY: fclean
+fclean:
+	-for lib in $(dir $(LIBS_PATH)); do $(MAKE) -s -C $$lib $@; done
+	rm -rf $(MAKE_DIR) $(NAME)
 
-re: fclean all
+.PHONY: re
+re: fclean
+	$(MAKE)
 
-.PHONY: all clean fclean re
+# ================MISC================= #
+
+.PHONY: print-%
+print-%:
+	@echo $(patsubst print-%,%,$@)=
+	@echo $($(patsubst print-%,%,$@))
+
+.PHONY: force
+force:
 
 -include $(DEPS)
+
+.DEFAULT_GOAL := all

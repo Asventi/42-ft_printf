@@ -1,2 +1,0 @@
-04.d 357 renverra 357 comme si cetait 4.d alors 04d renverra 0357
-.0d 0 renverra rien car 0 nest pas un chiffre significant parce contre 0.1d 0 renverra bien 0 car on accept au max un chiffre significant

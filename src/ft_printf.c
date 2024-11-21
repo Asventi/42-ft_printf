@@ -6,7 +6,7 @@
 /*   By: pjarnac <pjarnac@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 10:55:56 by pjarnac           #+#    #+#             */
-/*   Updated: 2024/11/18 16:09:57 by pjarnac          ###   ########.fr       */
+/*   Updated: 2024/11/19 15:16:10 by pjarnac          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,6 @@ static void	add_str(char **res, char *str)
 	free(temp);
 	free(str);
 }
-
 
 int	ft_printf(const char *s, ...)
 {

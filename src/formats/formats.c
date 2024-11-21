@@ -6,7 +6,7 @@
 /*   By: pjarnac <pjarnac@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 14:00:59 by pjarnac           #+#    #+#             */
-/*   Updated: 2024/11/18 17:09:08 by pjarnac          ###   ########.fr       */
+/*   Updated: 2024/11/19 10:25:36 by pjarnac          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,6 @@ static char	*apply_format(char t, va_list *args)
 char	*process_format(char **idx, va_list *args)
 {
 	int		i;
-	// Flags : type -> Hash -> space -> plus
 	char	type;
 	char	*res;
 

@@ -1,0 +1,7 @@
+.make
+.vscode
+*.o
+*.swp
+*.d
+*.a
+ft_printf_test

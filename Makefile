@@ -6,7 +6,7 @@
 #    By: pjarnac <pjarnac@student.42lyon.fr>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/19 11:53:22 by pjarnac           #+#    #+#              #
-#    Updated: 2024/11/20 16:40:58 by pjarnac          ###   ########.fr        #
+#    Updated: 2024/11/21 15:33:47 by pjarnac          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -103,19 +103,19 @@ show:
 
 $(NAME): $(LIBS_PATH) $(OBJS)
 	@echo $(MODE) > $(MODE_TRACE)
-	cp $(LIBS_PATH) $(NAME)
+	@cp $(LIBS_PATH) $(NAME)
 	$(AR) $(ARFLAGS) $(NAME) $(OBJS)
 
 $(BUILD_DIR)%.o: $(SRC_DIR)%.c
 	@mkdir -p $(@D)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
-$(LIBS_PATH):
-	$(MAKE) -C $(@D)
+$(LIBS_PATH): force
+	@$(MAKE) -C $(@D)
 
 .PHONY: $(MODES)
 $(MODES):
-	$(MAKE) MODE=$@
+	@$(MAKE) MODE=$@
 
 .PHONY: clean
 clean:
@@ -129,7 +129,7 @@ fclean:
 
 .PHONY: re
 re: fclean
-	$(MAKE)
+	@$(MAKE)
 
 # ================MISC================= #
 

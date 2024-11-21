@@ -6,7 +6,7 @@
 #    By: pjarnac <pjarnac@student.42lyon.fr>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/19 11:53:22 by pjarnac           #+#    #+#              #
-#    Updated: 2024/11/21 15:33:47 by pjarnac          ###   ########.fr        #
+#    Updated: 2024/11/21 15:57:03 by pjarnac          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -78,9 +78,9 @@ else
 endif
 
 ifeq ($(MODE), debug)
-	CFLAGS += -g3
+	CFLAGS = -g3
 else ifeq ($(MODE), fsanitize)
-	CFLAGS += -g3 -fsanitize=address
+	CFLAGS = -g3 -fsanitize=address
 else ifeq ($(MODE), optimize)
 	CFLAGS += -O2
 else ifeq ($(MODE), full-optimize)

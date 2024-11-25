@@ -1,5 +1,5 @@
-.make
-.vscode
+.make/
+.vscode/
 *.o
 *.swp
 *.d

@@ -6,7 +6,7 @@
 #    By: pjarnac <pjarnac@student.42lyon.fr>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/19 11:53:22 by pjarnac           #+#    #+#              #
-#    Updated: 2024/11/21 15:57:03 by pjarnac          ###   ########.fr        #
+#    Updated: 2024/11/25 10:55:52 by pjarnac          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -36,6 +36,7 @@ FORMATS_DIR =	formats/
 FORMATS_SRC =	formats.c \
 				num_formats.c \
 				str_formats.c \
+				hex_formats.c \
 
 # ==========LIBS / INCLUDES============ #
 

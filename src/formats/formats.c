@@ -6,13 +6,12 @@
 /*   By: pjarnac <pjarnac@student.42lyon.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 14:00:59 by pjarnac           #+#    #+#             */
-/*   Updated: 2024/11/19 10:25:36 by pjarnac          ###   ########.fr       */
+/*   Updated: 2024/11/25 12:42:02 by pjarnac          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "formats.h"
 #include "libft.h"
-#include <stdio.h>
 #include <stdarg.h>
 
 static bool	is_flag(char c, char *flags)
@@ -26,38 +25,39 @@ static bool	is_flag(char c, char *flags)
 	return (false);
 }
 
-static char	*apply_format(char t, va_list *args)
+static void	apply_format(char t, va_list *args, int *total)
 {
 	if (t == 'd' || t == 'i')
-		return (from_int(va_arg(*args, int)));
+		from_int(va_arg(*args, int), total);
 	else if (t == 'c')
-		return (from_char(va_arg(*args, int)));
-	return (0);
+		from_char(va_arg(*args, int), total);
+	else if (t == 'u')
+		from_uint(va_arg(*args, unsigned int), total);
+	else if (t == 's')
+		from_str(va_arg(*args, const char *), total);
+	else if (t == 'x')
+		from_lowhex(va_arg(*args, unsigned int), total);
+	else if (t == 'X')
+		from_uphex(va_arg(*args, unsigned int), total);
+	else if (t == 'p')
+		from_ptr(va_arg(*args, void *), total);
+	else if (t == '%')
+		from_percent(total);
 }
 
-char	*process_format(char **idx, va_list *args)
+void	process_format(char **idx, va_list *args, int *total)
 {
-	int		i;
 	char	type;
-	char	*res;
 
 	type = 0;
-	i = -1;
 	if (is_flag(**idx, "cspdiuxX%"))
 	{
 		type = **idx;
-		res = apply_format(type, args);
-		if (!res)
-			return (0);
+		apply_format(type, args, total);
 		*idx = *idx + 1;
-		return (res);
 	}
 	else
 	{
-		if (**idx == '\0')
-			res = ft_strdup("");
-		else
-			res = ft_strdup("%");
+		ft_putchar_fd('%', 1);
 	}
-	return (res);
 }
